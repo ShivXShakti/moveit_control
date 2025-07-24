@@ -20,14 +20,19 @@ public:
         RCLCPP_WARN(this->get_logger(), "Waiting for robot_description...");
         rclcpp::sleep_for(500ms);
 
-        auto move_group = std::make_shared<MoveGroupInterface>(shared_from_this(), "arm");
+        auto move_group = std::make_shared<MoveGroupInterface>(shared_from_this(), "urs_arml");
 
         // Define target pose
         geometry_msgs::msg::Pose target_pose;
-        target_pose.position.x = 0.1;
-        target_pose.position.y = 0.1;
-        target_pose.position.z = 0.7;
-        target_pose.orientation.w = 0.0;
+        target_pose.position.x = 0.3;
+        target_pose.position.y = 0.3;
+        target_pose.position.z = 1.3;
+        target_pose.orientation.w = 0.6533;
+        target_pose.orientation.x = 0.6533;
+        target_pose.orientation.y = 0.2706;
+        target_pose.orientation.z = 0.2706;
+
+        
 
         move_group->setPoseTarget(target_pose);
 
