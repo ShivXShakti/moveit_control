@@ -12,7 +12,7 @@ class PlannedJointExtractor : public rclcpp::Node
 {
 public:
     PlannedJointExtractor() : Node("planned_joint_extractor") {
-        joint_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/position_controller/commands", 10);
+        joint_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/moveit/joint_states", 10);
     }
 
     void run()
@@ -20,17 +20,17 @@ public:
         RCLCPP_WARN(this->get_logger(), "Waiting for robot_description...");
         rclcpp::sleep_for(500ms);
 
-        auto move_group = std::make_shared<MoveGroupInterface>(shared_from_this(), "urs_arml");
+        auto move_group = std::make_shared<MoveGroupInterface>(shared_from_this(), "left_arm");
 
         // Define target pose
         geometry_msgs::msg::Pose target_pose;
-        target_pose.position.x = 0.3;
-        target_pose.position.y = 0.3;
-        target_pose.position.z = 1.3;
-        target_pose.orientation.w = 0.6533;
-        target_pose.orientation.x = 0.6533;
-        target_pose.orientation.y = 0.2706;
-        target_pose.orientation.z = 0.2706;
+        target_pose.position.x = 0.1;
+        target_pose.position.y = 0.5;
+        target_pose.position.z = 1.1;
+        target_pose.orientation.w = -0.003;
+        target_pose.orientation.x = 0.004;
+        target_pose.orientation.y = 0.706;
+        target_pose.orientation.z = 0.708;
 
         
 

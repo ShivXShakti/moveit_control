@@ -9,9 +9,9 @@ def generate_launch_description():
     moveit_config = MoveItConfigsBuilder("svaya", package_name="moveit_config").to_moveit_configs()
     # MoveItCpp demo executable
     moveit_cpp_node = Node(
-        name="planned_joint_extractor",
+        name="trajectory_test",
         package="moveit_control",
-        executable="planned_joint_extractor",
+        executable="trajectory_test",
         output="screen",
         parameters=[
             moveit_config.robot_description,

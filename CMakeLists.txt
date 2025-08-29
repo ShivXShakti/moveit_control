@@ -24,7 +24,44 @@ moveit_ros_planning_interface
 interactive_markers
 moveit_ros_planning
 control_msgs)
-install(TARGETS planned_joint_extractor DESTINATION lib/${PROJECT_NAME})
+
+add_executable(trajectory_test src/trajectory_test.cpp)
+target_include_directories(trajectory_test
+PUBLIC include)
+ament_target_dependencies(trajectory_test ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(traj_ee src/traj_ee.cpp)
+target_include_directories(traj_ee
+PUBLIC include)
+ament_target_dependencies(traj_ee ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(traj_cart src/traj_cart.cpp)
+target_include_directories(traj_cart
+PUBLIC include)
+ament_target_dependencies(traj_cart ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+install(TARGETS planned_joint_extractor trajectory_test traj_ee traj_cart DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)
