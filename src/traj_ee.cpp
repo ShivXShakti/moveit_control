@@ -33,7 +33,7 @@ target_pose1.orientation.w = 0.708;
 
 target_pose1.position.x = 0.343;
 target_pose1.position.y = 0.3;
-target_pose1.position.z = 1.0;
+target_pose1.position.z = 1.3;
 move_group.setPoseTarget(target_pose1);
 moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 bool success =

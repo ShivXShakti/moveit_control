@@ -26,7 +26,7 @@ public:
         geometry_msgs::msg::Pose target_pose;
         target_pose.position.x = 0.1;
         target_pose.position.y = 0.5;
-        target_pose.position.z = 1.1;
+        target_pose.position.z = 1.3;
         target_pose.orientation.w = -0.003;
         target_pose.orientation.x = 0.004;
         target_pose.orientation.y = 0.706;
