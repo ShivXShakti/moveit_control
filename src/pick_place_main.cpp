@@ -62,21 +62,21 @@ int main(int argc, char **argv) {
                                 DEFINE POSES
     -----------------------------------------------------------------------*/
 
-    geometry_msgs::msg::Pose pregrasp_pose;
-    // pregrasp_pose.orientation.x = 0.4777052281279642;
-    // pregrasp_pose.orientation.y = 0.521342224;
-    // pregrasp_pose.orientation.z = 0.4777052281279642;
-    // pregrasp_pose.orientation.w = -0.5213422244737228;
-    //pregrasp_pose.orientation = rpyToQuat(0.0, 0.0, 90.0);
-    pregrasp_pose.position.x = 0.5;
-    pregrasp_pose.position.y = -0.3;
-    pregrasp_pose.position.z = 1.3;
+    geometry_msgs::msg::Pose pregrasp_posel, pregrasp_poser;
+    pregrasp_posel.orientation = rpyToQuat(50.0, 0.0, 0.0);
+    pregrasp_posel.position.x = 0.5;
+    pregrasp_posel.position.y = 0.3;
+    pregrasp_posel.position.z = 1.3;
+    pregrasp_poser.orientation = rpyToQuat(50.0, 0.0, 0.0);
+    pregrasp_poser.position.x = 0.5;
+    pregrasp_poser.position.y = -0.3;
+    pregrasp_poser.position.z = 1.3;
 
     std::vector<geometry_msgs::msg::Pose> waypoints;
     waypoints.push_back(pregrasp_pose);
 
     moveit_msgs::msg::RobotTrajectory trajectory;
-    const double eef_step = 0.005;   // resolution of interpolation
+    const double eef_step = 0.01;   // resolution of interpolation
     const double jump_threshold = 0.0; // disable jump threshold
     double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
 
