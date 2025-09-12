@@ -17,8 +17,9 @@
 
 using namespace std::chrono_literals;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("move_group_demo");
-static const std::string PLANNING_GROUP = "right_arm";
+/*-------------------------------------------------------------------
+                                METHODS
+-----------------------------------------------------------------------*/
 double deg2rad(double deg) {
   return deg * M_PI / 180.0;
 }
@@ -37,43 +38,42 @@ geometry_msgs::msg::Quaternion rpyToQuat(double roll, double pitch, double yaw)
   return q_msg;
 }
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("move_group_demo");
+static const std::string PLANNING_GROUP = "left_arm"; 
+
 
 int main(int argc, char **argv) {
-    rclcpp::init(argc, argv);
+  /*-------------------------------------------------------------------
+                                Do not modify
+    -----------------------------------------------------------------------*/  
+  rclcpp::init(argc, argv);
     rclcpp::NodeOptions node_options;
     node_options.automatically_declare_parameters_from_overrides(true);
     auto move_group_node = rclcpp::Node::make_shared("pick_place", node_options);
-    
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(move_group_node);
     std::thread([&executor]() { executor.spin(); }).detach();
-
     auto traj_pub = move_group_node->create_publisher<std_msgs::msg::Float64MultiArray>("planned_trajectory", 10);
-    
     moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-    
     //const moveit::core::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
     RCLCPP_INFO(LOGGER, "Planning frame: %s", move_group.getPlanningFrame().c_str());
     RCLCPP_INFO(LOGGER, "End effector link: %s", move_group.getEndEffectorLink().c_str());
     RCLCPP_INFO(LOGGER, "Available Planning Groups:");
-    std::copy(move_group.getJointModelGroupNames().begin(),move_group.getJointModelGroupNames().end(),std::ostream_iterator<std::string>(std::cout, ", "));
+    std::copy(move_group.getJointModelGroupNames().begin(),
+              move_group.getJointModelGroupNames().end(),
+              std::ostream_iterator<std::string>(std::cout, ", "));
     
     /*-------------------------------------------------------------------
                                 DEFINE POSES
     -----------------------------------------------------------------------*/
-
-    geometry_msgs::msg::Pose pregrasp_posel, pregrasp_poser;
-    pregrasp_posel.orientation = rpyToQuat(50.0, 0.0, 0.0);
-    pregrasp_posel.position.x = 0.5;
-    pregrasp_posel.position.y = 0.3;
-    pregrasp_posel.position.z = 1.3;
-    pregrasp_poser.orientation = rpyToQuat(50.0, 0.0, 0.0);
-    pregrasp_poser.position.x = 0.5;
-    pregrasp_poser.position.y = -0.3;
-    pregrasp_poser.position.z = 1.3;
+    geometry_msgs::msg::Pose left_pose;
+    left_pose.orientation = rpyToQuat(50.0, 0.0, 0.0);
+    left_pose.position.x = 0.5;
+    left_pose.position.y = 0.3;
+    left_pose.position.z = 1.2;
 
     std::vector<geometry_msgs::msg::Pose> waypoints;
-    waypoints.push_back(pregrasp_pose);
+    waypoints.push_back(left_pose);
 
     moveit_msgs::msg::RobotTrajectory trajectory;
     const double eef_step = 0.01;   // resolution of interpolation

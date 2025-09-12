@@ -48,6 +48,31 @@ interactive_markers
 moveit_ros_planning
 control_msgs)
 
+add_executable(both_arm_pick_place src/both_arm_pick_place.cpp)
+target_include_directories(both_arm_pick_place
+PUBLIC include)
+ament_target_dependencies(both_arm_pick_place ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(single_arm_pick_place src/single_arm_pick_place.cpp)
+target_include_directories(single_arm_pick_place
+PUBLIC include)
+ament_target_dependencies(single_arm_pick_place ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+
 add_executable(planned_joint_extractor src/planned_joint_extractor.cpp)
 target_include_directories(planned_joint_extractor
 PUBLIC include)
@@ -96,7 +121,17 @@ interactive_markers
 moveit_ros_planning
 control_msgs)
 
-install(TARGETS home pick_place_main pick_place planned_joint_extractor trajectory_test traj_ee traj_cart DESTINATION lib/${PROJECT_NAME})
+install(TARGETS 
+    home 
+    pick_place_main
+    pick_place 
+    single_arm_pick_place
+    both_arm_pick_place 
+    planned_joint_extractor 
+    trajectory_test 
+    traj_ee 
+    traj_cart 
+  DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)
