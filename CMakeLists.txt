@@ -1,0 +1,340 @@
+cmake_minimum_required(VERSION 3.8)
+project(moveit_control)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(interactive_markers REQUIRED)
+find_package(control_msgs REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
+
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(depthai_ros_msgs REQUIRED)
+find_package(dualarm_custom_msgs REQUIRED)
+find_package(darm_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+
+
+add_executable(home src/home.cpp)
+target_include_directories(home
+PUBLIC include)
+ament_target_dependencies(home ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(pick_place src/pick_place.cpp)
+target_include_directories(pick_place
+PUBLIC include)
+ament_target_dependencies(pick_place ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(planned_joint_extractor src/planned_joint_extractor.cpp)
+target_include_directories(planned_joint_extractor
+PUBLIC include)
+ament_target_dependencies(planned_joint_extractor ament_cmake 
+  rclcpp rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+control_msgs)
+
+add_executable(yolo_pose_sub_pub src/yolo_pose_sub_pub.cpp)
+target_include_directories(yolo_pose_sub_pub
+PUBLIC include)
+ament_target_dependencies(yolo_pose_sub_pub ament_cmake 
+  rclcpp
+  geometry_msgs
+  sensor_msgs
+  tf2_ros
+  tf2_geometry_msgs
+  cv_bridge
+  OpenCV
+  depthai_ros_msgs
+  dualarm_custom_msgs)
+
+add_executable(traj_test src/traj_test.cpp)
+target_include_directories(traj_test
+PUBLIC include)
+ament_target_dependencies(traj_test ament_cmake 
+  rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs)
+
+add_executable(setPose_traj_test src/traj_test_setPose.cpp)
+target_include_directories(setPose_traj_test
+PUBLIC include)
+ament_target_dependencies(setPose_traj_test ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(cam_setPose_traj_test src/traj_test_setPose_cam.cpp)
+target_include_directories(cam_setPose_traj_test
+PUBLIC include)
+ament_target_dependencies(cam_setPose_traj_test ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(dummycam_setPose_traj_test src/traj_test_setPose_dummycam.cpp)
+target_include_directories(dummycam_setPose_traj_test
+PUBLIC include)
+ament_target_dependencies(dummycam_setPose_traj_test ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(pick_place_setPose src/pick_place_setPose.cpp)
+target_include_directories(pick_place_setPose
+PUBLIC include)
+ament_target_dependencies(pick_place_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(botharm_pick_place_setPose src/botharm_pick_place_setPose.cpp)
+target_include_directories(botharm_pick_place_setPose
+PUBLIC include)
+ament_target_dependencies(botharm_pick_place_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(cam_pick_place_setPose src/cam_pick_place_setPose.cpp)
+target_include_directories(cam_pick_place_setPose
+PUBLIC include)
+ament_target_dependencies(cam_pick_place_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(both_arm_setJoint src/both_arm_setJoint.cpp)
+target_include_directories(both_arm_setJoint
+PUBLIC include)
+ament_target_dependencies(both_arm_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(both_arm_pick_place_setJoint src/both_arm_pick_place_setJoint.cpp)
+target_include_directories(both_arm_pick_place_setJoint
+PUBLIC include)
+ament_target_dependencies(both_arm_pick_place_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(both_arm_cyl_pick_place_setJoint src/both_arm_cyl_pick_place_setJoint.cpp)
+target_include_directories(both_arm_cyl_pick_place_setJoint
+PUBLIC include)
+ament_target_dependencies(both_arm_cyl_pick_place_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(both_arm_bottle_pick_place_setJoint src/both_arm_bottle_pick_place_setJoint.cpp)
+target_include_directories(both_arm_bottle_pick_place_setJoint
+PUBLIC include)
+ament_target_dependencies(both_arm_bottle_pick_place_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs)
+
+add_executable(test_hw_setJoint src/test_hw_setJoint.cpp)
+target_include_directories(test_hw_setJoint
+PUBLIC include)
+ament_target_dependencies(test_hw_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
+add_executable(test_hw_singleArm_setJoint src/test_hw_singleArm_setJoint.cpp)
+target_include_directories(test_hw_singleArm_setJoint
+PUBLIC include)
+ament_target_dependencies(test_hw_singleArm_setJoint ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
+add_executable(test_cam_setPose src/test_cam_setPose.cpp)
+target_include_directories(test_cam_setPose
+PUBLIC include)
+ament_target_dependencies(test_cam_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
+add_executable(hw_singleArm_pick_place_setPose src/hw_singleArm_pick_place_setPose.cpp)
+target_include_directories(hw_singleArm_pick_place_setPose
+PUBLIC include)
+ament_target_dependencies(hw_singleArm_pick_place_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
+install(TARGETS 
+    home 
+    pick_place 
+    planned_joint_extractor 
+    yolo_pose_sub_pub
+    traj_test
+    setPose_traj_test
+    dummycam_setPose_traj_test
+    cam_setPose_traj_test
+    pick_place_setPose
+    botharm_pick_place_setPose
+    cam_pick_place_setPose
+    both_arm_setJoint
+    both_arm_pick_place_setJoint
+    both_arm_cyl_pick_place_setJoint
+    both_arm_bottle_pick_place_setJoint
+    test_hw_setJoint
+    test_hw_singleArm_setJoint
+    test_cam_setPose
+    hw_singleArm_pick_place_setPose
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME})
+
+ament_package()
