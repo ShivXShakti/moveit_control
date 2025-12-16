@@ -49,7 +49,7 @@ public:
         
         move_group_->setPlanningTime(10.0);
         //set planner
-        //move_group_->setPlannerId("CHOMP");
+        move_group_->setPlannerId("CHOMP");
         //move_group_->setPlannerId("RRTConnectkConfigDefault");  //ompl
         //move_group_->setNumPlanningAttempts(5);
         
