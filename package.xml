@@ -22,6 +22,7 @@
   <depend>cv_bridge</depend>
   <depend>depthai_ros_msgs</depend>
   <depend>dualarm_custom_msgs</depend>
+  <depend>moveit_msgs</depend>
 
 
 

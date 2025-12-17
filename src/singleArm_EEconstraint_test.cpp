@@ -59,7 +59,7 @@ public:
         //set planner
         move_group_->setPlannerId("CHOMP");
         //move_group_->setPlannerId("RRTConnectkConfigDefault");  //ompl
-        move_group_->setNumPlanningAttempts(5);
+        //move_group_->setNumPlanningAttempts(5);
         
         move_group_gripper_left_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
         this->rclcpp::Node::shared_from_this(), "gripper_left");
@@ -130,16 +130,20 @@ public:
             return;
         }
 
-        moveit_msgs::msg::AttachedCollisionObject attach_object;
-        attach_object.link_name = "L_delto_base_flange";
-        attach_object.object.id = "bottle";
-        attach_object.object.operation = attach_object.object.ADD;
-        planning_scene_interface.applyAttachedCollisionObject(attach_object);
-        RCLCPP_WARN(this->get_logger(), "Attached Object.");
+        // moveit_msgs::msg::AttachedCollisionObject attach_object;
+        // attach_object.link_name = "L_delto_base_flange";
+        // attach_object.object.id = "bottle";
+        // attach_object.object.operation = attach_object.object.ADD;
+        // planning_scene_interface.applyAttachedCollisionObject(attach_object);
+        // RCLCPP_WARN(this->get_logger(), "Attached Object.");
 
         /* ==============================
             2. MOVE TO PLACE POSE
            ==============================*/
+        move_group_->setStartStateToCurrentState();
+        move_group_->clearPoseTargets();
+
+        setEEConstraints(move_group_, 0.3, 1.0);
         geometry_msgs::msg::Pose place_pose;
         place_pose.orientation.x = 0.5;
         place_pose.orientation.y = 0.5;
@@ -149,6 +153,10 @@ public:
         place_pose.position.y = 0.3;
         place_pose.position.z = -0.45;
         move_group_->setPoseTarget(place_pose);
+        //move_group_->setPositionTarget(
+        place_pose.position.x,
+        place_pose.position.y,
+        place_pose.position.z);
         moveit::planning_interface::MoveGroupInterface::Plan plan_place;
         auto success_place = (move_group_->plan(plan_place) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
         if (success_place) {
@@ -179,8 +187,8 @@ public:
             RCLCPP_WARN(this->get_logger(), "Failed to plan gripper closing.");
             return;
         }
-        attach_object.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
-        planning_scene_interface.applyAttachedCollisionObject(attach_object);
+        // attach_object.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+        // planning_scene_interface.applyAttachedCollisionObject(attach_object);
         
         /* ==============================
             3. MOVE TO home
@@ -256,7 +264,43 @@ private:
             "🟢 Stored first object: %s | Position [x: %.3f, y: %.3f, z: %.3f]",
             obj.object_name.c_str(), pose.position.x, pose.position.y, pose.position.z);
     }
-    
+    void setEEConstraints(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface> &move_group, double tolerance=0.01, double weight=1.0){
+        if (!move_group) {
+        throw std::runtime_error("MoveGroupInterface pointer is null");
+        }
+
+        moveit_msgs::msg::OrientationConstraint ocm;
+
+        // End-effector link
+        ocm.link_name = move_group->getEndEffectorLink();
+
+        // Planning frame
+        ocm.header.frame_id = move_group->getPlanningFrame();
+
+        // Current orientation
+        auto current_pose = move_group->getCurrentPose().pose;
+
+        // Normalize quaternion (recommended)
+        tf2::Quaternion q;
+        tf2::fromMsg(current_pose.orientation, q);
+        q.normalize();
+        ocm.orientation = tf2::toMsg(q);
+
+        // Axis tolerances
+        ocm.absolute_x_axis_tolerance = tolerance;
+        ocm.absolute_y_axis_tolerance = tolerance;
+        ocm.absolute_z_axis_tolerance = tolerance;
+
+        // Constraint importance
+        ocm.weight = weight;
+
+        // Wrap and apply
+        moveit_msgs::msg::Constraints constraints;
+        constraints.orientation_constraints.push_back(ocm);
+
+        move_group->setPathConstraints(constraints);
+
+    }
 
     void execute_hw(const moveit::planning_interface::MoveGroupInterface::Plan &plan)
     {

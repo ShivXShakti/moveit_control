@@ -22,6 +22,7 @@ find_package(depthai_ros_msgs REQUIRED)
 find_package(dualarm_custom_msgs REQUIRED)
 find_package(darm_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(moveit_msgs REQUIRED)
 
 
 add_executable(home src/home.cpp)
@@ -312,6 +313,24 @@ tf2
 tf2_geometry_msgs
 darm_msgs)
 
+add_executable(cam_singleArm_pick_place_setPose src/cam_singleArm_pick_place_setPose.cpp)
+target_include_directories(cam_singleArm_pick_place_setPose
+PUBLIC include)
+ament_target_dependencies(cam_singleArm_pick_place_setPose ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+moveit_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
 install(TARGETS 
     home 
     pick_place 
@@ -332,6 +351,7 @@ install(TARGETS
     test_hw_singleArm_setJoint
     test_cam_setPose
     hw_singleArm_pick_place_setPose
+    cam_singleArm_pick_place_setPose
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch
