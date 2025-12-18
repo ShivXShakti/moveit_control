@@ -331,6 +331,42 @@ tf2
 tf2_geometry_msgs
 darm_msgs)
 
+add_executable(singleArm_EEconstraint_test src/singleArm_EEconstraint_test.cpp)
+target_include_directories(singleArm_EEconstraint_test
+PUBLIC include)
+ament_target_dependencies(singleArm_EEconstraint_test ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+moveit_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
+add_executable(hw_test src/hw_test.cpp)
+target_include_directories(hw_test
+PUBLIC include)
+ament_target_dependencies(hw_test ament_cmake 
+rclcpp
+rclcpp_action
+moveit_core
+moveit_ros_planning_interface
+interactive_markers
+moveit_ros_planning
+dualarm_custom_msgs
+control_msgs
+shape_msgs
+moveit_msgs
+tf2
+tf2_geometry_msgs
+darm_msgs)
+
 install(TARGETS 
     home 
     pick_place 
@@ -352,6 +388,8 @@ install(TARGETS
     test_cam_setPose
     hw_singleArm_pick_place_setPose
     cam_singleArm_pick_place_setPose
+    singleArm_EEconstraint_test
+    hw_test
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch

@@ -33,13 +33,9 @@ using namespace std::chrono_literals;
 
 class MoveItPlanner : public rclcpp::Node{
 public:
-    MoveItPlanner(): Node("pick_place"),planning_group_("arm_left"),pose_received_(false)
+    MoveItPlanner(): Node("pick_place"),planning_group_("arm_left")
     {
-        subscription_ = this->create_subscription<dualarm_custom_msgs::msg::ObjPoseArray>(
-            "object_pose_torso", 10,
-            std::bind(&MoveItPlanner::poseCallback, this, _1));
         pub_hw = this->create_publisher<darm_msgs::msg::UiCommand>("/svaya/ui/command", 10);
-
         pub_hw_freq = 20.0;
     }
     
@@ -60,6 +56,8 @@ public:
         move_group_->setPlannerId("CHOMP");
         //move_group_->setPlannerId("RRTConnectkConfigDefault");  //ompl
         //move_group_->setNumPlanningAttempts(5);
+        move_group_->setMaxVelocityScalingFactor(0.2);
+        move_group_->setMaxAccelerationScalingFactor(0.2);
         
         move_group_gripper_left_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
         this->rclcpp::Node::shared_from_this(), "gripper_left");
@@ -78,10 +76,6 @@ public:
 
     void run()
     {
-        rclcpp::Rate wait_rate(10);
-        while (rclcpp::ok() && !pose_received_) {
-            wait_rate.sleep();
-        }
         if (!rclcpp::ok()) return;
 
         RCLCPP_INFO(this->get_logger(), "First pose received, starting trajectory planning...");
@@ -93,7 +87,9 @@ public:
         grasp_pose.orientation.y = 0.5;
         grasp_pose.orientation.z = 0.5;
         grasp_pose.orientation.w = 0.5;
-        grasp_pose.position = first_pose_.position;
+        grasp_pose.position.x = 0.51;
+        grasp_pose.position.y = 0.2;
+        grasp_pose.position.z = -0.4;
         move_group_->setPoseTarget(grasp_pose);
         moveit::planning_interface::MoveGroupInterface::Plan plan_grasp;
         auto success_grasp = (move_group_->plan(plan_grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
@@ -105,201 +101,30 @@ public:
             RCLCPP_INFO(this->get_logger(), "Did not plan trajectory.");
             return;
         }
-         /* ==============================
-             GRIPPER 
-           ==============================*/
-        // // std::vector<double> gripper_close_l = {-0.01745, 0.15024, 1.98968, 0.86708, -0.01745, 0.31791,
-        // //                                           1.84650, 0.85199, -0.01920, -0.24435, 1.87340, 0.90973};
-        std::vector<double> gripper_close_l = {-0.01745, 0.0, 0.5, 0.86708,
-                                            -0.01745, 0.0, 1.0, 0.85199,
-                                            -0.01920, 0.0, 1.0, 0.90973};
-
-        std::vector<std::string> joint_names = move_group_gripper_left_->getJointNames();
-        std::map<std::string, double> joint_targets;
-        for (size_t i = 0; i < joint_names.size(); ++i){
-            joint_targets[joint_names[i]] = gripper_close_l[i];}
-        move_group_gripper_left_->setJointValueTarget(joint_targets);
-        moveit::planning_interface::MoveGroupInterface::Plan gripper_plan;
-        auto successC1 = (move_group_gripper_left_->plan(gripper_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-        if (successC1){
-            move_group_gripper_left_->execute(gripper_plan);
-            RCLCPP_INFO(this->get_logger(), "Gripper action successfully executed.");
-        }
-        else{
-            RCLCPP_WARN(this->get_logger(), "Failed to plan gripper closing.");
-            return;
-        }
-
-        // moveit_msgs::msg::AttachedCollisionObject attach_object;
-        // attach_object.link_name = "L_delto_base_flange";
-        // attach_object.object.id = "bottle";
-        // attach_object.object.operation = attach_object.object.ADD;
-        // planning_scene_interface.applyAttachedCollisionObject(attach_object);
-        // RCLCPP_WARN(this->get_logger(), "Attached Object.");
-
-        /* ==============================
-            2. MOVE TO PLACE POSE
-           ==============================*/
-        move_group_->setStartStateToCurrentState();
-        move_group_->clearPoseTargets();
-
-        setEEConstraints(move_group_, 0.3, 1.0);
-        geometry_msgs::msg::Pose place_pose;
-        place_pose.orientation.x = 0.5;
-        place_pose.orientation.y = 0.5;
-        place_pose.orientation.z = 0.5;
-        place_pose.orientation.w = 0.5;
-        place_pose.position.x = 0.5;
-        place_pose.position.y = 0.3;
-        place_pose.position.z = -0.45;
-        move_group_->setPoseTarget(place_pose);
-        //move_group_->setPositionTarget(
-        place_pose.position.x,
-        place_pose.position.y,
-        place_pose.position.z);
-        moveit::planning_interface::MoveGroupInterface::Plan plan_place;
-        auto success_place = (move_group_->plan(plan_place) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-        if (success_place) {
-            move_group_->execute(plan_place);
-            //execute_hw(plan_place);
-            RCLCPP_INFO(this->get_logger(), "========Reached grasp pose==========.");}
-        else{
-            RCLCPP_INFO(this->get_logger(), "Did not plan trajectory.");
-            return;}
-        move_group_->clearPathConstraints();
-
-
-        /* ==============================
-            GRIPPER 
-        ==============================*/
-        std::vector<double> gripper_open_r = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-        std::map<std::string, double> joint_targetsr1;
-        for (size_t i = 0; i < joint_names.size(); ++i){
-            joint_targetsr1[joint_names[i]] = gripper_open_r[i];}
-        move_group_gripper_left_->setJointValueTarget(joint_targetsr1);
-        moveit::planning_interface::MoveGroupInterface::Plan gripper_planr1;
-        auto successr1 = (move_group_gripper_left_->plan(gripper_planr1) == moveit::core::MoveItErrorCode::SUCCESS);
-        if (successr1){
-            move_group_gripper_left_->execute(gripper_planr1);
-            RCLCPP_INFO(this->get_logger(), "Gripper action successfully executed.");
-        }
-        else{
-            RCLCPP_WARN(this->get_logger(), "Failed to plan gripper closing.");
-            return;
-        }
-        // attach_object.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
-        // planning_scene_interface.applyAttachedCollisionObject(attach_object);
-        
-        /* ==============================
-            3. MOVE TO home
-           ==============================*/
-        std::vector<std::string> arm_joint_names = move_group_->getJointNames();
-        size_t n_joints = arm_joint_names.size();
-
-        if (n_joints == 0) {
-            RCLCPP_ERROR(this->get_logger(), "No joints found in arm!");
-            return;
-        }
-
-        RCLCPP_INFO(this->get_logger(), "arm has %zu joints", n_joints);
-        std::vector<double> zero_joints(n_joints, 0.0);
-        move_group_->setJointValueTarget(zero_joints);
-        moveit::planning_interface::MoveGroupInterface::Plan plan_both;
-        bool success = (move_group_->plan(plan_both) ==
-                        moveit::core::MoveItErrorCode::SUCCESS);
-
-        if (success) {
-            move_group_->execute(plan_both);
-        }else{
-            RCLCPP_ERROR(this->get_logger(), "Planning to ZERO joints failed!");
-            return;
-        }
-        
-        //execute_hw(plan_both);    
     }
 
 private:
     double deg2rad(double deg) { return deg * M_PI / 180.0; }
-    
-    void Gripper(const std::vector<double> &gripper_joint_values){
-        if (gripper_joint_values.size() != 12){
-            RCLCPP_ERROR(this->get_logger(), "Gripper joint values vector must have 12 elements.");
-            return;
-        }
-        auto node = rclcpp::Node::make_shared("tmp_gripper_node");
-        moveit::planning_interface::MoveGroupInterface gripper_group(node, "gripper_right");
-        std::vector<std::string> joint_names = gripper_group.getJointNames();
-        if (joint_names.size() != 12){
-            RCLCPP_ERROR(this->get_logger(), "Gripper MoveGroup has %zu joints, expected 12.", joint_names.size());
-            return;
-        }
-        std::map<std::string, double> joint_targets;
-        for (size_t i = 0; i < joint_names.size(); ++i){
-            joint_targets[joint_names[i]] = gripper_joint_values[i];
-        }
-        gripper_group.setJointValueTarget(joint_targets);
-        moveit::planning_interface::MoveGroupInterface::Plan gripper_plan;
-        auto success = (gripper_group.plan(gripper_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-        if (success){
-            gripper_group.execute(gripper_plan);
-            RCLCPP_INFO(this->get_logger(), "Gripper action successfully executed.");
-        }
-        else{
-            RCLCPP_WARN(this->get_logger(), "Failed to plan gripper closing.");
-        }
-    }
-
-    void poseCallback(const dualarm_custom_msgs::msg::ObjPoseArray::SharedPtr msg){
-        if (pose_received_) return;
-        if (msg->data.empty()) {
-            RCLCPP_WARN(this->get_logger(), "Received empty ObjPoseArray.");
-            return;
-        }
-        const auto &obj = msg->data.front();
-        const auto &pose = obj.pose_stamped.pose;
-
-        first_pose_ = pose; 
-        pose_received_ = true;
-        RCLCPP_INFO(this->get_logger(),
-            "🟢 Stored first object: %s | Position [x: %.3f, y: %.3f, z: %.3f]",
-            obj.object_name.c_str(), pose.position.x, pose.position.y, pose.position.z);
-    }
     void setEEConstraints(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface> &move_group, double tolerance=0.01, double weight=1.0){
         if (!move_group) {
-        throw std::runtime_error("MoveGroupInterface pointer is null");
+            throw std::runtime_error("MoveGroupInterface pointer is null");
         }
 
         moveit_msgs::msg::OrientationConstraint ocm;
-
-        // End-effector link
         ocm.link_name = move_group->getEndEffectorLink();
-
-        // Planning frame
         ocm.header.frame_id = move_group->getPlanningFrame();
-
-        // Current orientation
         auto current_pose = move_group->getCurrentPose().pose;
-
-        // Normalize quaternion (recommended)
         tf2::Quaternion q;
         tf2::fromMsg(current_pose.orientation, q);
         q.normalize();
         ocm.orientation = tf2::toMsg(q);
-
-        // Axis tolerances
         ocm.absolute_x_axis_tolerance = tolerance;
         ocm.absolute_y_axis_tolerance = tolerance;
         ocm.absolute_z_axis_tolerance = tolerance;
-
-        // Constraint importance
         ocm.weight = weight;
-
-        // Wrap and apply
         moveit_msgs::msg::Constraints constraints;
         constraints.orientation_constraints.push_back(ocm);
-
         move_group->setPathConstraints(constraints);
-
     }
 
     void execute_hw(const moveit::planning_interface::MoveGroupInterface::Plan &plan)

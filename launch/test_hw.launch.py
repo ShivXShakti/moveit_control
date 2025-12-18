@@ -11,7 +11,7 @@ def generate_launch_description():
     moveit_cpp_node = Node(
         name="pick_place",
         package="moveit_control",
-        executable="test_hw_setJoint",
+        executable="singleArm_EEconstraint_test",
         output="screen",
         parameters=[
             moveit_config.robot_description, 
